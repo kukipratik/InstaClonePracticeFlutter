@@ -1,7 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:insta_clone/resources/auth_method.dart';
 import 'package:insta_clone/utils/colors.dart';
+import 'package:insta_clone/utils/utils.dart';
 import 'package:insta_clone/widget/text_field.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -16,6 +20,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
+  Uint8List? _image;
 
 //this dispose function will dispose the fields init once the widget is dispose...
   @override
@@ -53,15 +58,24 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           Stack(
             children: [
-              const CircleAvatar(
-                radius: 55,
-                backgroundColor: blueColor,
-              ),
+              _image != null
+                  ? CircleAvatar(
+                      radius: 55,
+                      backgroundImage: MemoryImage(
+                          _image!), //MemoryImage is for Uint8List file type...
+                      // This will work easily for android but in ios we need to do some changes in the info.pist file....
+                    )
+                  : const CircleAvatar(
+                      radius: 55,
+                      backgroundImage:
+                          NetworkImage("https://i.stack.imgur.com/l60Hf.png"),
+                    ),
               Positioned(
                 bottom: -10,
                 left: 70,
                 child: IconButton(
-                    onPressed: () {}, icon: const Icon(Icons.add_a_photo)),
+                    onPressed: () => selectImage(),
+                    icon: const Icon(Icons.add_a_photo)),
               )
             ],
           ),
@@ -102,7 +116,13 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           GestureDetector(
             onTap: () async {
-              String res = await AuthMethods().signupUser(email: _emailController.text, password: _passwordController.text, userName: _userNameController.text, bio: _bioController.text,);
+              String res = await AuthMethods().signupUser(
+                email: _emailController.text,
+                password: _passwordController.text,
+                userName: _userNameController.text,
+                bio: _bioController.text,
+                file: _image!
+              );
               print(res);
             },
             child: Container(
@@ -139,5 +159,12 @@ class _SignupScreenState extends State<SignupScreen> {
         ],
       ),
     )));
+  }
+
+  Future<void> selectImage() async {
+    Uint8List im = await pickImage(ImageSource.gallery);
+    setState(() {
+      _image = im;
+    });
   }
 }
