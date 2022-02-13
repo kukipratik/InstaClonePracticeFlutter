@@ -8,6 +8,11 @@ import 'package:insta_clone/utils/colors.dart';
 import 'package:insta_clone/utils/utils.dart';
 import 'package:insta_clone/widget/text_field.dart';
 
+import '../responsiveLayouts/mob_screen_layout.dart';
+import '../responsiveLayouts/responsive_layout.dart';
+import '../responsiveLayouts/web_screen_layout.dart';
+import 'login_screen.dart';
+
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
 
@@ -123,8 +128,8 @@ class _SignupScreenState extends State<SignupScreen> {
               width: double.infinity,
               child: _isLoading
                   ? const CircularProgressIndicator(
-                    color: primaryColor,
-                  )
+                      color: primaryColor,
+                    )
                   : const Text(
                       "SignUp",
                       style: TextStyle(
@@ -144,12 +149,21 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text(
-                "Don't have a account?",
-                style: TextStyle(),
+            children: [
+              const Text(
+                "Already have a account?",
+                style: TextStyle(fontSize: 17),
               ),
-              Text("Sign up"),
+              GestureDetector(
+                onTap: navigateToLogin,
+                child: const Text(
+                  "Log in",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
             ],
           )
         ],
@@ -162,6 +176,13 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() {
       _image = im;
     });
+  }
+
+  void navigateToLogin() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
   }
 
   Future<void> signUpUser() async {
@@ -179,7 +200,14 @@ class _SignupScreenState extends State<SignupScreen> {
       _isLoading = false;
     });
     if (res != 'sucess') {
-      showSnackBar(res, context);
+      // this pushReplacement will not allow to pop to previous page...
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const ResponsiveLayout(
+                mobScreenLayout: MobScreenLayout(),
+                webScreenLayout: WebScreenLayout())),
+      );
     } else {
       // Lazy me! Not doing anything...hump!!!
     }

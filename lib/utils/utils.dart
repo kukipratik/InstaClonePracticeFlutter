@@ -11,11 +11,9 @@ pickImage(ImageSource source) async {
     //we can also use code as:-
     // return File(_file.path); which needs"import dart:io" (dart:io is not supported for web version)..
     // we we're using :-
-    print(" Img selected");
     return await _file
         .readAsBytes(); // this requires type of Uint8list file...(in auth_method.dart)
   }
-  print("No img selected");
 }
 
 ///to show the snackbar...

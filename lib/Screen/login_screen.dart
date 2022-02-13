@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:insta_clone/Screen/signup_screen.dart';
+import 'package:insta_clone/resources/auth_method.dart';
 import 'package:insta_clone/utils/colors.dart';
+import 'package:insta_clone/utils/utils.dart';
 import 'package:insta_clone/widget/text_field.dart';
+
+import '../responsiveLayouts/mob_screen_layout.dart';
+import '../responsiveLayouts/responsive_layout.dart';
+import '../responsiveLayouts/web_screen_layout.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -13,6 +20,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
 //this dispose function will dispose the fields init once the widget is dispose...
   @override
@@ -64,18 +72,22 @@ class _LoginScreenState extends State<LoginScreen> {
             height: 20,
           ),
           InkWell(
-            onTap: (){},
+            onTap: () => logInuser(),
             child: Container(
               padding: const EdgeInsets.all(8),
               alignment: Alignment.center,
               width: double.infinity,
-              child: const Text(
-                "Login",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25,
-                ),
-              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(
+                      color: primaryColor,
+                    )
+                  : const Text(
+                      "Login",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25,
+                      ),
+                    ),
               decoration: BoxDecoration(
                 color: blueColor,
                 borderRadius: BorderRadius.circular(5),
@@ -94,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(fontSize: 17),
               ),
               GestureDetector(
-                onTap: (){},
+                onTap: () => navigateToSignup(),
                 child: const Text(
                   " Sign up",
                   style: TextStyle(
@@ -111,5 +123,36 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
     )));
+  }
+
+  Future<void> logInuser() async {
+    setState(() {
+      _isLoading = true;
+    });
+    String res = await AuthMethods().logInUser(
+        email: _emailController.text, password: _passwordController.text);
+
+    if (res == 'Sucess') {
+      // this pushReplacement will not allow to pop to previous page...
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const ResponsiveLayout(
+                mobScreenLayout: MobScreenLayout(),
+                webScreenLayout: WebScreenLayout())),
+      );
+    } else {
+      showSnackBar(res, context);
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void navigateToSignup() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SignupScreen()),
+    );
   }
 }

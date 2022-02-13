@@ -1,8 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:insta_clone/Screen/login_screen.dart';
-import 'package:insta_clone/Screen/signup_screen.dart';
 import 'package:insta_clone/responsiveLayouts/mob_screen_layout.dart';
 import 'package:insta_clone/responsiveLayouts/responsive_layout.dart';
 import 'package:insta_clone/responsiveLayouts/web_screen_layout.dart';
@@ -40,16 +40,35 @@ class MyApp extends StatelessWidget {
           .copyWith(scaffoldBackgroundColor: mobileBackgroundColor),
 
       // giving route to start with...
-      initialRoute: "/signup",
+      // initialRoute: "/login",
       //defining the routes....
-      routes: {
-        "/login": (context) => const LoginScreen(),
-        "/signup": (context) => const SignupScreen(),
-      },
+      // routes: {
+      //   "/login": (context) => const LoginScreen(),
+      //   "/signup": (context) => const SignupScreen(),
+      // },
 
-      home: const ResponsiveLayout(
-          mobScreenLayout: MobScreenLayout(),
-          webScreenLayout: WebScreenLayout()),
+      home: StreamBuilder(
+          //This stream will make us help the user logged in...
+          // stream: FirebaseAuth.instance.idTokenChanges(),
+          stream: FirebaseAuth.instance.authStateChanges(),
+          // stream: FirebaseAuth.instance.userChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.active) {
+              if (snapshot.hasData) {
+                return const ResponsiveLayout(
+                    mobScreenLayout: MobScreenLayout(),
+                    webScreenLayout: WebScreenLayout());
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text("${snapshot.error}"),
+                );
+              }
+            } else if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                  child: CircularProgressIndicator(color: primaryColor));
+            }
+            return const LoginScreen();
+          }),
     );
   }
 }
