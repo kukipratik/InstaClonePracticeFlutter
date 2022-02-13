@@ -2,12 +2,13 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:insta_clone/resources/storage_method.dart';
 
 class AuthMethods {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
 
-  //sign up user
+  ///sign up user...
   signupUser({
     required String email,
     required String password,
@@ -26,6 +27,10 @@ class AuthMethods {
             email: email, password: password);
         // print(cred.user!.uid);
 
+        //adding user profile pic in Firestore...
+        String photoUrl = await StorageMethod()
+            .uploadImageToStorage("profilePics", file, false);
+
         //Adding user info in our fireStore....
         await _fireStore.collection("users").doc(cred.user!.uid).set({
           "username": userName,
@@ -34,6 +39,7 @@ class AuthMethods {
           "bio": bio,
           "followers": [],
           "following": [],
+          "photoUrl": photoUrl,
         });
 
         //This method will make doc itself for the user....
@@ -46,9 +52,17 @@ class AuthMethods {
         //   "following": [],
         // });
       }
-    } catch (err) {
+    } 
+    // on FirebaseAuthException catch (err) {
+    //   if (err.code == "invalid-email") {
+    //     res = 'The email is badly formatted.';
+    //   } else if (err.code == 'weak-password') {
+    //     res = 'Password should be at least 6 characters.';
+    //   }
+    // }
+     catch (err) {
       res = err.toString();
+      return res;
     }
-    return res;
   }
 }

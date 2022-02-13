@@ -21,6 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
   Uint8List? _image;
+  bool _isLoading = false;
 
 //this dispose function will dispose the fields init once the widget is dispose...
   @override
@@ -115,27 +116,22 @@ class _SignupScreenState extends State<SignupScreen> {
             height: 15,
           ),
           GestureDetector(
-            onTap: () async {
-              String res = await AuthMethods().signupUser(
-                email: _emailController.text,
-                password: _passwordController.text,
-                userName: _userNameController.text,
-                bio: _bioController.text,
-                file: _image!
-              );
-              print(res);
-            },
+            onTap: () => signUpUser(),
             child: Container(
               padding: const EdgeInsets.all(8),
               alignment: Alignment.center,
               width: double.infinity,
-              child: const Text(
-                "SignUp",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25,
-                ),
-              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(
+                    color: primaryColor,
+                  )
+                  : const Text(
+                      "SignUp",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25,
+                      ),
+                    ),
               decoration: BoxDecoration(
                 color: blueColor,
                 borderRadius: BorderRadius.circular(5),
@@ -166,5 +162,26 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() {
       _image = im;
     });
+  }
+
+  Future<void> signUpUser() async {
+    setState(() {
+      _isLoading = true;
+    });
+    String res = await AuthMethods().signupUser(
+      email: _emailController.text,
+      password: _passwordController.text,
+      userName: _userNameController.text,
+      bio: _bioController.text,
+      file: _image!,
+    );
+    setState(() {
+      _isLoading = false;
+    });
+    if (res != 'sucess') {
+      showSnackBar(res, context);
+    } else {
+      // Lazy me! Not doing anything...hump!!!
+    }
   }
 }
